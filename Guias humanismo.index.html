@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación Tesis: Generador Automatizado de Guías Humanísticas</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --secondary: #0284c7;
+            --accent: #0d9488;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --border: #cbd5e1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px; display: flex; gap: 20px; height: 100vh; overflow: hidden; }
+        
+        /* Paneles principales */
+        .config-panel { width: 40%; background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); height: 100%; overflow-y: auto; }
+        .preview-panel { width: 60%; background: var(--card); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); height: 100%; overflow-y: auto; }
+        
+        h1 { font-size: 18px; color: var(--primary); margin-bottom: 10px; border-bottom: 3px solid var(--secondary); padding-bottom: 5px; }
+        h2 { font-size: 13px; color: white; background: var(--primary); padding: 6px 10px; border-radius: 4px; margin: 15px 0 10px 0; text-transform: uppercase; }
+        h3 { font-size: 13px; color: var(--secondary); margin: 12px 0 4px 0; border-bottom: 1px dashed var(--border); padding-bottom: 2px; }
+        
+        .section-tag { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 10px; font-size: 9px; font-weight: bold; margin-left: 5px; vertical-align: middle; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 3px; color: #475569; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; background: #f1f5f9; }
+        input:focus, select:focus, textarea:focus { background: #fff; border-color: var(--secondary); outline: none; }
+        textarea { height: 50px; resize: none; }
+        
+        .btn-generate { width: 100%; background: linear-gradient(135deg, #1e3a8a, #0284c7); color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+        .btn-generate:hover { opacity: 0.95; transform: translateY(-1px); }
+        
+        /* Formato Estilo Documento Oficial (Anexo A) */
+        .doc-output { font-size: 12px; line-height: 1.5; color: #334155; }
+        .doc-header { text-align: center; margin-bottom: 15px; border-bottom: 2px dashed var(--border); padding-bottom: 8px; }
+        .doc-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 11px; }
+        .doc-table th, .doc-table td { border: 1px solid #94a3b8; padding: 8px; text-align: left; vertical-align: top; }
+        .doc-table th { background-color: #f1f5f9; color: var(--primary); font-weight: bold; }
+        
+        .output-box { background: #f8fafc; border-left: 3px solid var(--secondary); padding: 8px; margin: 5px 0; border-radius: 0 6px 6px 0; font-style: italic; color: #1e293b; }
+        .instruction-text { font-size: 10px; color: #64748b; background: #f8fafc; padding: 5px; border: 1px solid var(--border); border-radius: 4px; margin: 4px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="config-panel">
+        <h1>⚙️ Automatización de Guías de Estudio</h1>
+        <p style="font-size: 11px; color:#64748b;">Herramienta modular de co-diseño curricular para áreas de Humanidades.</p>
+        
+        <h2>1. Datos e Identificación</h2>
+        <div class="form-group">
+            <label>Institución</label>
+            <input type="text" id="ins-name" value="Universidad Lasalle Bajío, campus Salamanca">
+        </div>
+        <div class="form-group">
+            <label>Carrera</label>
+            <input type="text" id="car-name" value="Ingeniería en Automatización y Control Industrial" readonly>
+        </div>
+        <div class="form-group">
+            <label>Asignatura Humanística</label>
+            <select id="asig-select">
+                <option value="Contexto Mundial y Nacional">Contexto Mundial y Nacional</option>
+                <option value="Antropología Filosófica">Antropología Filosófica</option>
+                <option value="El humanismo">El humanismo</option>
+                <option value="Religión, cultura y trascendencia">Religión, cultura y trascendencia</option>
+                <option value="El mundo desde la perspectiva cristiana">El mundo desde la perspectiva cristiana</option>
+                <option value="La comunidad cristiana en la posmodernidad">La comunidad cristiana en la posmodernidad</option>
+                <option value="Ciudadanía y responsabilidad social">Ciudadanía y responsabilidad social</option>
+                <option value="Ética">Ética</option>
+                <option value="Bioética">Bioética</option>
+                <option value="Ciencia y tecnología">Ciencia y tecnología</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tema Base</label>
+            <input type="text" id="tema-input" value="Límites de la tecnología y el dilema del control autónomo">
+        </div>
+        <div class="form-group">
+            <label>Subtemas (Separados por comas)</label>
+            <input type="text" id="subtemas-input" value="Dignidad de la persona, Tecnocracia, Bien común y comunidad">
+        </div>
+        <div class="form-group">
+            <label>Eje Temático de Interés (Criterio d)</label>
+            <select id="narrativa-select">
+                <option value="Robots">Robots y Sistemas de Automatización Autónomos</option>
+                <option value="Videojuegos">Videojuegos, Entornos Virtuales y Recompensas</option>
+                <option value="Películas">Películas de Ciencia Ficción y Futuros Distópicos</option>
+                <option value="Juegos">Juegos Matemáticos y Acertijos Lógicos</option>
+            </select>
+        </div>
+
+        <h2>2. Autogestión Co-Diseñada</h2>
+        <div class="form-group">
+            <label>Tipo de Compromiso (Punto 2 Anexo A)</label>
+            <select id="compromiso-select">
+                <option value="grupal">Compromiso Grupal (Células de Ingeniería Corporativa)</option>
+                <option value="individual">Compromiso Individual (Autogestión Personal)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Observaciones (Notas de Agenda)</label>
+            <input type="text" id="obs-input" placeholder="Ej. Considerar los días de asueto de la sesión parcial...">
+        </div>
+
+        <h2>3. Apartado Paramétrico</h2>
+        <div class="form-group">
+            <label>Objetivo de Aprendizaje</label>
+            <textarea id="obj-textarea">El estudiante evaluará de manera crítica y reflexiva las implicaciones sociales de la automatización para estructurar proyectos con un alto sentido ético y de responsabilidad comunitaria.</textarea>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <div class="form-group" style="flex:1;"><label>H. Aula</label><input type="number" id="h-aula" value="4"></div>
+            <div class="form-group" style="flex:1;"><label>H. Autónomas</label><input type="number" id="h-auto" value="6"></div>
+            <div class="form-group" style="flex:1;"><label>Valor (%)</label><input type="number" id="val-parcial" value="60"></div>
+        </div>
+        <div class="form-group">
+            <label>Modalidad de Organización</label>
+            <input type="text" id="modalidad-input" value="Trabajo Colaborativo en Células de Desarrollo">
+        </div>
+
+        <h2>4. Selección de Recursos por Menú</h2>
+        <div class="form-group">
+            <label>Misión 1 - Recurso Visual (Menú 1)</label>
+            <select id="m1-menu1">
+                <option value="Infografía Analítica Interactiva">Infografía Analítica Interactiva</option>
+                <option value="Mapa Mental Esquemático de Procesos">Mapa Mental Esquemático de Procesos</option>
+                <option value="Presentación Técnica Dinámica">Presentación Técnica Dinámica</option>
+                <option value="Tutorial Estructurado en Video Corto">Tutorial Estructurado en Video Corto</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Misión 1 - Recurso Multimedia (Menú 2)</label>
+            <select id="m1-menu2">
+                <option value="Fragmento cinematográfico de la película Tiempos Modernos">Fragmento de Película Clásica</option>
+                <option value="Video documental sobre Alienación Tecnológica">Video Documental Científico</option>
+                <option value="Videojuego de simulación de toma de decisiones éticas">Videojuego / Entorno Virtual Educativo</option>
+                <option value="Cuestionario de análisis conceptual en Quizizz">Quizizz interactivo de velocidad lectora</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Misión 4 - Producto Tangible (Menú Opciones)</label>
+            <select id="m4-producto">
+                <option value="Cómic o Historieta Virtual Pedagógica (Canva o Pixton)">Cómic o Historieta Virtual</option>
+                <option value="Pintura o Representación Gráfica Expresiva Análoga">Pintura o Cuadro Expresivo</option>
+                <option value="Poema o Manifiesto de Compromiso Social-Ético">Poema o Manifiesto Ético</option>
+                <option value="Podcast de Audio Técnico-Humano (3 minutos)">Podcast de Audio Estructurado</option>
+                <option value="Performance o Sketch Dramatizado en Video">Performance o Sketch en Video</option>
+                <option value="Ensayo Crítico de Pensamiento Lento">Ensayo Filosófico Riguroso</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Misión 4 - Pausa Activa Ergonómica</label>
+            <select id="m4-pausa">
+                <option value="Sesión de 5 minutos de ergonomía laboral (estiramientos de muñeca, cuello y espalda baja) para contrarrestar la fatiga del monitor.">Ergonomía Laboral (Muñecas y espalda)</option>
+                <option value="Ejercicios de respiración diafragmática y control del estrés generado por sobreestimulación tecnológica.">Respiración contra estrés de pantalla</option>
+                <option value="Ejercicios de relajación ocular y activación psicomotriz fina.">Ejercicios Oculares y Físicos</option>
+            </select>
+        </div>
+
+        <button class="btn-generate" onclick="generarReporteAnexoA()">⚡ Compilar Guía Oficial (Anexo A)</button>
+    </div>
+
+    <div class="preview-panel">
+        <div id="placeholder" style="text-align: center; color: #94a3b8; padding-top: 150px;">
+            <p style="font-size: 40px;">📄</p>
+            <p style="font-size: 12px; font-weight: bold; margin-top: 8px;">Configura los parámetros del docente y compila para estructurar la guía.</p>
+        </div>
+        <div id="documento-area" class="doc-output" style="display: none;"></div>
+    </div>
+
+    <script>
+        function generarReporteAnexoA() {
+            document.getElementById('placeholder').style.display = 'none';
+            const contenedor = document.getElementById('documento-area');
+            contenedor.style.display = 'block';
+            
+            // Valores capturados en vivo de la interfaz
+            const inst = document.getElementById('ins-name').value;
+            const carr = document.getElementById('car-name').value;
+            const asig = document.getElementById('asig-select').value;
+            const tema = document.getElementById('tema-input').value;
+            const subs = document.getElementById('subtemas-input').value;
+            const narr = document.getElementById('narrativa-select').value;
+            const comp = document.getElementById('compromiso-select').value;
+            const obs  = document.getElementById('obs-input').value || "Ninguna registrada.";
+            const obj  = document.getElementById('obj-textarea').value;
+            const ha   = document.getElementById('h-aula').value;
+            const hg   = document.getElementById('h-auto').value;
+            const val  = document.getElementById('val-parcial').value;
+            const mod  = document.getElementById('modalidad-input').value;
+            
+            const m1Visual = document.getElementById('m1-menu1').value;
+            const m1Multi  = document.getElementById('m1-menu2').value;
+            const m4Prod   = document.getElementById('m4-producto').value;
+            const m4Pausa  = document.getElementById('m4-pausa').value;
+
+            // Generador combinatorio adaptado según la asignatura y el eje de interés lúdico
+            let titGuia = `Estudio de Caso Especializado en ${asig}`;
+            let mision = `Desarrollar y evaluar un plan de acción técnica que resuelva los dilemas de automatización integrando las directrices morales de la materia ${asig}.`;
+            let caso = "";
+            let biblio = "";
+
+            if(narr === "Robots") {
+                titGuia = `Operación Autómata Consciente y los Paradigmas de ${asig}`;
+                caso = `Una fábrica del sector automotriz en el corredor industrial del Bajío ha automatizado sus líneas de control mediante algoritmos predictivos. Aunque la productividad se incrementó un 35%, se ha manifestado un severo desinterés laboral y deshumanización en el equipo de ingenieros y operadores técnicos de piso. Sienten que el sistema los reduce a meros recolectores de datos matemáticos, omitiendo su valor social e integral. ¿Cómo proponer un rediseño que equilibre el control lógico-técnico con los principios de dignidad y comunidad estudiados en ${asig}?`;
+                biblio = `Dirígete a la biblioteca central de la universidad. Localiza en los estantes físicos un texto impreso sobre Ética Profesional o Antropología. Realiza de forma obligatoria la lectura analítica (pensamiento lento) de 2 a 3 páginas relativas a la primacía del ser humano y redacta tu conclusión a mano.`;
+            } else if(narr === "Videojuegos") {
+                titGuia = `Misión Ecosistemas Virtuales, Recompensas y el Enfoque Crítico de ${asig}`;
+                caso = `Una corporación de control de procesos químicos ha implementado interfaces gamificadas, convirtiendo los tableros de alarmas industriales críticas en mecánicas lúdicas de obtención de insignias y puntos. Esto ha provocado que los operadores técnicos traten las variables de riesgo como un videojuego, desensibilizándose ante los accidentes industriales y perdiendo el sentido de la responsabilidad civil y comunitaria. ¿Cómo intervenir esta problemática con la teoría de ${asig}?`;
+                biblio = `Acude al catálogo físico de la biblioteca de la institución. Extrae un libro impreso de humanidades o sociología que aborde las dinámicas de la hiperestimulación o la desmaterialización de las relaciones de valor. Genera un reporte manuscrito.`;
+            } else if(narr === "Películas") {
+                titGuia = `Proyecto Distopías Tecnocráticas: Análisis Situado para ${asig}`;
+                caso = `En una planta logística automatizada, un software monitorea las variables corporales de los ingenieros, aplicando penalizaciones algorítmicas si su rendimiento decae un 2%. Los desarrolladores defienden que la matemática predictiva es perfecta y superior a cualquier juicio humano racional. Los ingenieros presentan crisis existenciales y alienación. ¿Cómo argumentarías un cambio de paradigma respetando la asignatura ${asig}?`;
+                biblio = `Ubica en el área de humanidades de la biblioteca un volumen sobre Filosofía del Trabajo o Doctrina Social. Realiza una dosificación lectora minuciosa de un capítulo corto y redacta un análisis reflexivo a puño y letra.`;
+            } else {
+                titGuia = `Desafío de Lógica Matemática y Sentido Social en la asignatura ${asig}`;
+                caso = `Un sistema de automatización decide de forma utilitaria qué secciones operativas de una planta regional deben clausurarse basándose únicamente en el margen de ganancias, afectando drásticamente el tejido comunitario y el desarrollo local de las familias trabajadoras. ¿Cómo inyectarías restricciones humanas basadas en los ejes curriculares de ${asig} a la programación del sistema?`;
+                biblio = `Ve a la biblioteca física de tu campus. Consulta un texto impreso enfocado en la Responsabilidad Ciudadana, la Ética o el Humanismo. Analiza un fragmento de 3 páginas y documenta los hallazgos en formato manuscrito.`;
+            }
+
+            // Renderizar Bloque de Pacto y Firmas del punto 2
+            let bloqueFirmasHTML = "";
+            if (comp === "grupal") {
+                bloqueFirmasHTML = `
+                    <p>Los suscritos, integrantes del equipo de proyecto de la carrera de Ingeniería en Automatización y Control Industrial, nos comprometemos formalmente y de manera corresponsable a administrar nuestro tiempo de forma autorregulada para concluir, integrar y entregar las actividades de esta guía a más tardar el día: <strong>[ _____ / _____ / 2026 ]</strong></p>
+                    <div style="margin-top:8px; font-size:10px; line-height:1.4;">
+                        • Líder de Célula (Asignado de forma manual): ___________________________ (Firma)<br>
+                        • Ingeniero de Automatización y Soporte 1: ___________________________ (Firma)<br>
+                        • Ingeniero de Automatización y Soporte 2: ___________________________ (Firma)<br>
+                        • Ingeniero de Automatización y Soporte 3: ___________________________ (Firma)
+                    </div>`;
+            } else {
+                bloqueFirmasHTML = `
+                    <p>Yo, ____________________________________________, integrante de la carrera de Ingeniería, me comprometo de forma individual a administrar mi tiempo de manera autorregulada para concluir y entregar las actividades de esta guía a más tardar el día: <strong>[ _____ / _____ / 2026 ]</strong></p>
+                    <div style="margin-top:8px; font-size:10px;">
+                        • Firma Autógrafa del Estudiante: ___________________________
+                    </div>`;
+            }
+
+            // Inyección Unificada Estilo Formato Anexo A Oficial
+            contenedor.innerHTML = `
+                <div class="doc-header">
+                    <h2 style="background:none; color:var(--primary); padding:0; margin:0; font-size:14px; font-weight:bold;">ANEXO A: PROPUESTA DEL FORMATO PARA ELABORAR UNA GUÍA DE ESTUDIO</h2>
+                    <p style="font-size:9px; font-weight:bold; color:#64748b;">(MODELO EN ATENCIÓN AL PERFIL DEL ESTUDIANTE DE INGENIERÍA EN AUTOMATIZACIÓN Y CONTROL INDUSTRIAL)</p>
+                </div>
+
+                <table class="doc-table">
+                    <tr>
+                        <th colspan="2">1. Encabezado e Identificación General <span class="section-tag">Docente</span></th>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%;"><strong>Nombre de la Institución:</strong><br>${inst}</td>
+                        <td style="width: 50%;"><strong>Carrera:</strong><br>${carr}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Asignatura Humanística:</strong><br>${asig}</td>
+                        <td><strong>Temas Sugeridos de Abordaje:</strong><br>${tema}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><strong>Subtemas Críticos de la Unidad:</strong><br>${subs}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="background:#f8fafc; border-top: 2px solid var(--primary);">
+                            <strong>Título de la Guía Automatizada:</strong> ${titGuia}<br><br>
+                            <strong>Misión del Proyecto Generada:</strong>
+                            <div class="output-box">Misión: ${mision}</div>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="doc-table">
+                    <tr>
+                        <th>2. Bloque de Gestión de Autogestión y Compromiso Temporal <span class="section-tag">Criterio K</span></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>PACTO DE COMPROMISO TEMPORAL (Autorregulación Estudiantil)</strong>
+                            <div style="background:#fff; border:1px solid #94a3b8; padding:8px; border-radius:4px; margin:4px 0;">
+                                ${bloqueFirmasHTML}
+                            </div>
+                            <strong>Observaciones de Agenda (Docente):</strong> <span style="font-size:10px; color:#475569;">${obs}</span>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="doc-table">
+                    <tr>
+                        <th colspan="3">3. Apartado Paramétrico Obligatorio <span class="section-tag">Criterios B y G</span></th>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><strong>1. Objetivo de Aprendizaje Configurado:</strong><br>${obj}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>2. Horas de Aula (Presencial):</strong><br>[ ${ha} ] horas.</td>
+                        <td><strong>3. Horas de Trabajo Autónomo:</strong><br>[ ${hg} ] horas.</td>
+                        <td><strong>4. Valor de la Guía:</strong><br>[ ${val}% ] de la nota parcial.</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <strong>5. Forma de Organización (Modalidad):</strong><br>${mod}
+                            <div class="instruction-text">📋 <strong>Instrucción de Inicio:</strong> El nombre del líder de equipo y los roles del proyecto técnico serán asignados y firmados por los propios alumnos al arrancar el llenado de la guía.</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="font-size:10px; background:#f1f5f9;">
+                            • <strong>Formato de las Misiones:</strong> Reporte estructurado digitalmente. Las reflexiones individuales correspondientes a la Misión 3 serán estrictamente elaboradas de forma manuscrita e integradas mediante escaneo digital.<br>
+                            • <strong>Evidencia Única de Entrega:</strong> Unificación del desarrollo técnico y el enlace público del entregable artístico dentro de un solo documento PDF consolidado por la célula de trabajo.
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="doc-table">
+                    <tr>
+                        <th>4. Desarrollo de la Guía por Misiones <span class="section-tag">Propuesta de la App</span></th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 style="color:var(--primary);">Misión 1: Fase de Apertura Vivencial e Industrial (ABP)</h3>
+                            <p><strong>• El Desafío Situado del Entorno Real Industrial:</strong></p>
+                            <div class="output-box">${caso}</div>
+                            <p><strong>• Recursos de Abordaje Educativo Interactivos Vinculados:</strong></p>
+                            <ul style="margin-left:15px; font-size:11px; color:#0369a1; list-style-type: square;">
+                                <li>📌 <strong>Recurso Base (Menú Visual 1):</strong> [Acceso mediante enlace o QR] Soporte tipo <em>${m1Visual}</em> para estructurar el marco teórico.</li>
+                                <li>🎬 <strong>Recurso de Cierre (Menú Multimedia 2):</strong> [Acceso mediante enlace o QR] Elemento analítico tipo <em>${m1Multi}</em> para discusión guiada.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 style="color:var(--primary);">Misión 2: Fase de Desarrollo Cognitivo y Uso Crítico de IA (Criterio F)</h3>
+                            <p><strong>• Indagación Básica Conceptual:</strong> Realiza una consulta estructurada a un asistente de IA acerca de las bases del tema "${tema}" vinculadas directamente a la materia de ${asig}.</p>
+                            <p><strong>• Filtro de Pensamiento Crítico:</strong> Analiza críticamente el texto devuelto por la IA. Identifica y documenta en una tabla comparativa si el modelo mostró algún sesgo reduccionista o alucinación de contenido que omita la dimensión moral o social del ser humano.</p>
+                            <p><strong>• Sección de Juego de Roles (Roleplay Ético):</strong> Genera interacciones con una IA usando el prompt: <em>"Actúa como un auditor ético senior en automatización industrial. Genera un debate crítico con mi postura de ingeniero en el caso planteado en la Misión 1 utilizando la óptica de la asignatura ${asig}."</em> Mantén la argumentación por un mínimo de 3 réplicas.</p>
+                            <p><strong>• Diversificación Digital Avanzada:</strong> Emplea plataformas de agregación de contenido (como NotebookLM o similares) para procesar las lecturas de la unidad y consolidar un mapa estructural de decisiones.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 style="color:var(--primary);">Misión 3: Fase de Resistencia Pedagógica y Pensamiento Lento (Criterio J)</h3>
+                            <div class="instruction-text" style="border: 1px solid #f59e0b; background: #fffbeb;">⚠️ <strong>Regla Operativa Obligatoria:</strong> Desconexión digital controlada para romper el patrón de inmediatez tecnológica en ingeniería.</div>
+                            <p><strong>• Actividad Individual de Reflexión Profunda:</strong> ${biblio}</p>
+                            <p><strong>• Entregable Técnico requerido:</strong> Hoja de análisis física manuscrita con firma autógrafa anexada al PDF final.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <h3 style="color:var(--primary);">Misión 4: Fase de Expresión Creativa y Co-creación (Criterio E)</h3>
+                            <p><strong>• Reto Rápido / Acertijo Lógico (Gamificación):</strong> Resuelve el acertijo estructural de control y lógica algorítmica propuesto por el docente en la plataforma del aula virtual para desbloquear el nivel operativo del proyecto.</p>
+                            <p><strong>• Estrategia Design Thinking (Enfoque Social):</strong> Diseña con tu célula un protocolo de automatización centrada en el valor humano siguiendo las etapas de empatía e ideación de la metodología.</p>
+                            <p><strong>• PRODUCTO TANGIBLE DE LA MISIÓN SELECCIONADO POR EL DOCENTE:</strong></p>
+                            <div class="output-box"><strong>Entregable solicitado para esta guía:</strong> Desarrollo completo de un/a <u>${m4Prod}</u>. Deberá plasmar de forma creativa y profunda las habilidades humanas y axiológicas asimiladas a lo largo de las unidades en la asignatura ${asig}.</div>
+                            <p><strong>• Especificaciones de Calidad:</strong> Exportar con permisos públicos y añadir el enlace funcional dentro del reporte de entrega del equipo.</p>
+                            <p><strong>• Estación de Pausa Activa Obligatoria:</strong></p>
+                            <div style="background:#f0fdf4; border-left:3px solid var(--accent); padding:8px; font-style:italic;">
+                                🧘 <strong>Pausa Activa de Piso:</strong> Al concluir la estructura de diseño del guion y previo a la manufactura digital, el equipo ejecutará de forma mandatoria la siguiente dinámica de salud ocupacional: <em>${m4Pausa}</em>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <table class="doc-table">
+                    <tr>
+                        <th colspan="3">5. Bloque de Evaluación Equitativa y Corresponsable <span class="section-tag">Criterio H</span></th>
+                    </tr>
+                    <tr style="background:#f8fafc; font-weight:bold;">
+                        <td colspan="3">RÚBRICA DE EVALUACIÓN DEL PROYECTO ASOCIADA (100 PUNTOS = ${val}% DE LA NOTA PARCIAL)</td>
+                    </tr>
+                    <tr style="background:#e2e8f0; font-weight:bold;">
+                        <td>Criterios de Evaluación</td>
+                        <td>Estándar Máximo</td>
+                        <td>Puntos Obtenidos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Contenido y Rigor Conceptual:</strong> Comprensión profunda de los marcos humanísticos, resolución situada del problema industrial y calidad del reporte manuscrito.</td>
+                        <td>40 pts</td>
+                        <td>/ ____ pts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Uso Crítico de IA y Sentido Humano:</strong> Evidencia del aislamiento de alucinaciones en la tabla y nivel conceptual en las réplicas del roleplay ético.</td>
+                        <td>20 pts</td>
+                        <td>/ ____ pts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Desempeño Técnico y Expresión Creativa:</strong> Diseño estético, estructura del entregable artístico seleccionado y resolución de retos lógicos gamificados.</td>
+                        <td>20 pts</td>
+                        <td>/ ____ pts</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gestión del Tiempo y Colaboración Corp:</strong> Cumplimiento riguroso de las firmas del pacto de autogestión, orden, limpieza y coordinación de roles.</td>
+                        <td>20 pts</td>
+                        <td>/ ____ pts</td>
+                    </tr>
+                    <tr style="background:#cbd5e1; font-weight:bold;">
+                        <td>TOTAL COMPILADO DE LA MISIÓN</td>
+                        <td>100 pts</td>
+                        <td>TOTAL: / 100 pts</td>
+                    </tr>
+                </table>
+            `;
+        }
+    </script>
+</body>
+</html>
